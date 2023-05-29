@@ -1,9 +1,9 @@
 from rply import ParserGenerator
-from ast import Sum, Sub, Write, Mult, Div, Letter, Number
+from ast import Sum, Sub, Mult, Div, Number, Write
 
 
 class Parser():
-    def __init__(self, module, builder, write):  # -------
+    def __init__(self):
         self.pg = ParserGenerator(
             # A list of all token names accepted by the parser.
             ['NUMBER', 'WRITE', 'OPEN_PAREN', 'CLOSE_PAREN',
@@ -15,10 +15,6 @@ class Parser():
             ('left', ['SUM', 'SUB']),
             ('left', ['MULT', 'DIV'])
         ]
-
-        self.module = module  # -------
-        self.builder = builder  # -------
-        self.write = write  # -------
 
         """
             ['NUMBER', 'WRITE', 'OPEN_PAREN', 'CLOSE_PAREN',
@@ -34,7 +30,7 @@ class Parser():
         @self.pg.production(
             'program : PROGRAM MAIN OPEN_BRACKET WRITE OPEN_PAREN expression CLOSE_PAREN SEMI_COLON CLOSE_BRACKET')
         def program(p):
-            return Write(self.builder, self.module, self.write, p[5])  # --------
+            return Write(p[5])  # --------
 
         @self.pg.production('expression : expression SUM expression')
         @self.pg.production('expression : expression SUB expression')
@@ -45,21 +41,18 @@ class Parser():
             right = p[2]
             operator = p[1]
             if operator.gettokentype() == 'SUM':
-                return Sum(self.builder, self.module, left, right)  # --------
+                return Sum(left, right)
             elif operator.gettokentype() == 'SUB':
-                return Sub(self.builder, self.module, left, right)  # --------
+                return Sub(left, right)
             elif operator.gettokentype() == 'MULT':
-                return Mult(self.builder, self.module, left, right)  # --------
+                return Mult(left, right)
             elif operator.gettokentype() == 'DIV':
-                return Div(self.builder, self.module, left, right)  # --------
+                return Div(left, right)
 
         @self.pg.production('expression : NUMBER')
         def number(p):
-            return Number(self.builder, self.module, p[0].value)  # --------
+            return Number(p[0].value)
 
-        @self.pg.production('expression: LETTER')
-        def letter(p):
-            return Letter(self.builder, self.module, p[0].value)
 
         # @self.pg.production('block: BEGIN END SEMI_COLON')
         # def block(p):
