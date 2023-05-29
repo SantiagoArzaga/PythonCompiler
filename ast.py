@@ -21,6 +21,7 @@ class Sub(BinaryOp):
     def eval(self):
         return self.left.eval() - self.right.eval()
 
+
 class Mult(BinaryOp):
     def eval(self):
         return self.left.eval() * self.right.eval()
@@ -29,6 +30,12 @@ class Mult(BinaryOp):
 class Div(BinaryOp):
     def eval(self):
         return self.left.eval() / self.right.eval()
+
+
+class Equal(BinaryOp):
+    def eval(self):
+        return self.left.eval() == self.right.eval()
+
 
 class Write():
     def __init__(self, value):

@@ -1,5 +1,5 @@
 from rply import ParserGenerator
-from ast import Sum, Sub, Mult, Div, Number, Write
+from ast import Sum, Sub, Mult, Div, Number, Write, Equal
 
 
 class Parser():
@@ -8,7 +8,7 @@ class Parser():
             # A list of all token names accepted by the parser.
             ['NUMBER', 'WRITE', 'OPEN_PAREN', 'CLOSE_PAREN',
              'SEMI_COLON', 'SUM', 'SUB', 'PROGRAM', 'DIV', 'MULT',
-             'LETTER', 'MAIN', 'OPEN_BRACKET', 'CLOSE_BRACKET']
+             'LETTER', 'MAIN', 'OPEN_BRACKET', 'CLOSE_BRACKET', 'EQUAL']
         )
 
         precedence = [
@@ -21,8 +21,7 @@ class Parser():
              'SEMI_COLON', 'SUM', 'SUB', 'PROGRAM', 'BEGIN',
              'END', 'VAR', 'IF', 'ELSE', 'FOR', 'THEN', 'DO', 'WHILE',
              'INT', 'FLOAT', 'STRING',
-             'COLON', 'PERIOD', 'COMMA', 'DIV', 'MULT', 'GREATER', 'LESS',
-             'EQUAL']
+             'COLON', 'PERIOD', 'COMMA', 'DIV', 'MULT', 'GREATER', 'LESS']
             """
 
     def parse(self):
@@ -36,6 +35,7 @@ class Parser():
         @self.pg.production('expression : expression SUB expression')
         @self.pg.production('expression : expression MULT expression')
         @self.pg.production('expression : expression DIV expression')
+        @self.pg.production('expression : expression EQUAL expression')
         def expression(p):
             left = p[0]
             right = p[2]
@@ -48,6 +48,8 @@ class Parser():
                 return Mult(left, right)
             elif operator.gettokentype() == 'DIV':
                 return Div(left, right)
+            elif operator.gettokentype() == 'EQUAL':
+                return Equal(left, right)
 
         @self.pg.production('expression : NUMBER')
         def number(p):
