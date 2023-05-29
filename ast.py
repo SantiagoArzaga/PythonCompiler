@@ -54,6 +54,13 @@ class Div(BinaryOp):
         i = self.builder.udiv(self.left.eval(), self.right.eval())
         return i
 
+
+class Equal(BinaryOp):
+    def eval(self):
+        i = self.builder.store(self.left.eval(), self.right.eval())
+        return i
+
+
 # ----------------- #
 class Write():
     def __init__(self, builder, module, write, value):
@@ -78,6 +85,5 @@ class Write():
 
         # Call Print Function
         self.builder.call(self.write, [fmt_arg, value])
-
 
 # ----------------- #

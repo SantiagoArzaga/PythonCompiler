@@ -1,5 +1,5 @@
 from rply import ParserGenerator
-from ast import Sum, Sub, Write, Mult, Div, Letter, Number
+from ast import Sum, Sub, Write, Mult, Div, Letter, Number, Equal
 
 
 class Parser():
@@ -8,7 +8,7 @@ class Parser():
             # A list of all token names accepted by the parser.
             ['NUMBER', 'WRITE', 'OPEN_PAREN', 'CLOSE_PAREN',
              'SEMI_COLON', 'SUM', 'SUB', 'PROGRAM', 'DIV', 'MULT',
-             'LETTER', 'MAIN', 'OPEN_BRACKET', 'CLOSE_BRACKET']
+              'MAIN', 'OPEN_BRACKET', 'CLOSE_BRACKET','EQUAL']
         )
 
         precedence = [
@@ -21,12 +21,11 @@ class Parser():
         self.write = write  # -------
 
         """
-            ['NUMBER', 'WRITE', 'OPEN_PAREN', 'CLOSE_PAREN',
+            ['LETTER', 'NUMBER', 'WRITE', 'OPEN_PAREN', 'CLOSE_PAREN',
              'SEMI_COLON', 'SUM', 'SUB', 'PROGRAM', 'BEGIN',
              'END', 'VAR', 'IF', 'ELSE', 'FOR', 'THEN', 'DO', 'WHILE',
              'INT', 'FLOAT', 'STRING',
-             'COLON', 'PERIOD', 'COMMA', 'DIV', 'MULT', 'GREATER', 'LESS',
-             'EQUAL']
+             'COLON', 'PERIOD', 'COMMA', 'DIV', 'MULT', 'GREATER', 'LESS']
             """
 
     def parse(self):
@@ -40,6 +39,7 @@ class Parser():
         @self.pg.production('expression : expression SUB expression')
         @self.pg.production('expression : expression MULT expression')
         @self.pg.production('expression : expression DIV expression')
+        @self.pg.production('expression : expression EQUAL expression')
         def expression(p):
             left = p[0]
             right = p[2]
@@ -52,14 +52,13 @@ class Parser():
                 return Mult(self.builder, self.module, left, right)  # --------
             elif operator.gettokentype() == 'DIV':
                 return Div(self.builder, self.module, left, right)  # --------
+            elif operator.gettokentype() == 'EQUAL':
+                return Equal(self.builder, self.module, left, right)
 
         @self.pg.production('expression : NUMBER')
         def number(p):
             return Number(self.builder, self.module, p[0].value)  # --------
 
-        @self.pg.production('expression: LETTER')
-        def letter(p):
-            return Letter(self.builder, self.module, p[0].value)
 
         # @self.pg.production('block: BEGIN END SEMI_COLON')
         # def block(p):

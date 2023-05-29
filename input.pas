@@ -1,1 +1,1 @@
-program main { write(6*2/6); }
+program main { write(2=2); }
