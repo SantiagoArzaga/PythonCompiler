@@ -1,0 +1,1 @@
+program main { write(6*2/6); }
