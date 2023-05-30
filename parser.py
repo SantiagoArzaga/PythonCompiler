@@ -50,7 +50,7 @@ class Parser():
         def assignment2(p):
             return
 
-        @self.pg.production('block : BEGIN declaration END SEMI_COLON')
+        @self.pg.production('block : BEGIN SEMI_COLON declaration END SEMI_COLON')
         def block(p):
             return
 
