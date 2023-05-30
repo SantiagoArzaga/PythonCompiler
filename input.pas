@@ -1,1 +1,1 @@
-program main { var a = 2; }
+program main {  }

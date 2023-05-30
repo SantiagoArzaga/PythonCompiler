@@ -4,7 +4,6 @@ from rply import LexerGenerator
 class Lexer():
     def __init__(self):
         self.lexer = LexerGenerator()
-
     def _add_tokens(self):
 
         # Reserved
@@ -51,6 +50,7 @@ class Lexer():
         self.lexer.add('LESS', r'\<')
 
         self.lexer.add('LETTER', r'[a-zA-Z_]+')
+        self.lexer.add('EMPTY', r'""')
 
         # Number
         self.lexer.add('NUMBER', r'\d+')
