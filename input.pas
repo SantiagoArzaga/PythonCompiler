@@ -1,1 +1,1 @@
-program main { write(6*2/2); }
+program main { var a = 2; }

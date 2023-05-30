@@ -1,3 +1,5 @@
+
+
 class Number():
     def __init__(self, value):
         self.value = value
@@ -34,7 +36,9 @@ class Div(BinaryOp):
 
 class Equal(BinaryOp):
     def eval(self):
-        return self.left.eval() == self.right.eval()
+        a = self.left.eval()
+        b = self.right.eval()
+        return self.left.eval() % self.right.eval()
 
 
 class Write():
