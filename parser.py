@@ -21,19 +21,6 @@ class Parser():
             ('left', ['MULT', 'DIV'])
         ]
 
-        """
-            [ 'PERIOD']
-             
-                     #   def assignment(p):
-        #        var_name = p[0].getstr()
-        #         var_value = p[3]
-        #          locals()[var_name] = var_value
-        #           print(var_value)
-        #            return var_value
-        #@self.pg.production('assignment : expression')
-        #@self.pg.production('statement : expression')
-            """
-
     def parse(self):
         # @self.pg.production('program: PROGRAM OPEN_BRACKET assign block CLOSE_BRACKET')
         @self.pg.production('program : PROGRAM MAIN OPEN_BRACKET variabledeclaration block CLOSE_BRACKET')
