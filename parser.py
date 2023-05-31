@@ -1,12 +1,12 @@
 from rply import ParserGenerator
-from ast import Sum, Sub, Write, Mult, Div, Letter, Number, Equal
+from ast import *
 
 
 class Parser():
     def __init__(self, module, builder, write):  # -------
         self.pg = ParserGenerator(
             # A list of all token names accepted by the parser.
-            ['NUMBER', 'WRITE', 'OPEN_PAREN', 'CLOSE_PAREN',
+            ['NUMBER','LETTER', 'WRITE', 'OPEN_PAREN', 'CLOSE_PAREN',
              'SEMI_COLON', 'SUM', 'SUB', 'PROGRAM', 'DIV', 'MULT',
               'MAIN', 'OPEN_BRACKET', 'CLOSE_BRACKET','EQUAL']
         )
@@ -21,7 +21,7 @@ class Parser():
         self.write = write  # -------
 
         """
-            ['LETTER', 'NUMBER', 'WRITE', 'OPEN_PAREN', 'CLOSE_PAREN',
+            [, 'NUMBER', 'WRITE', 'OPEN_PAREN', 'CLOSE_PAREN',
              'SEMI_COLON', 'SUM', 'SUB', 'PROGRAM', 'BEGIN',
              'END', 'VAR', 'IF', 'ELSE', 'FOR', 'THEN', 'DO', 'WHILE',
              'INT', 'FLOAT', 'STRING',
@@ -53,12 +53,15 @@ class Parser():
             elif operator.gettokentype() == 'DIV':
                 return Div(self.builder, self.module, left, right)  # --------
             elif operator.gettokentype() == 'EQUAL':
-                return Equal(self.builder, self.module, left, right)
+                return VariableAssign(self.builder, self.module, left, right)
 
         @self.pg.production('expression : NUMBER')
         def number(p):
             return Number(self.builder, self.module, p[0].value)  # --------
 
+        @self.pg.production('expression : LETTER')
+        def letter(p):
+            return Letter(self.builder, self.module, p[0].value)
 
         # @self.pg.production('block: BEGIN END SEMI_COLON')
         # def block(p):

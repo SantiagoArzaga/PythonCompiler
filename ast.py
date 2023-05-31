@@ -60,6 +60,16 @@ class Equal(BinaryOp):
         i = self.builder.store(self.left.eval(), self.right.eval())
         return i
 
+class VariableAssign(BinaryOp):
+    def eval(self):
+        # Evaluate the right-hand side expression
+        rhs_value = self.right.eval()
+
+        # Store the value in the variable
+        self.builder.store(rhs_value, self.left.eval())
+
+        # Return the assigned value
+        return rhs_value
 
 # ----------------- #
 class Write():
