@@ -1,5 +1,6 @@
 from rply import ParserGenerator
 from ast import Sum, Sub, Mult, Div, Number, Write, Equal
+from ast import AbstractSyntaxTree as astfunc
 
 data = []
 
@@ -23,13 +24,15 @@ class Parser():
     def parse(self):
         @self.pg.production('program : PROGRAM MAIN OPEN_BRACKET variable_declaration block CLOSE_BRACKET')
         def program(p):
+            astfunc.program_end(astfunc)
             return p[5]
 
         @self.pg.production('variable_declaration : VAR assignment COLON type SEMI_COLON')
         def variable_declaration(p):
-            for row in data:
-                row['Type'] = p[3]
-            return
+            return astfunc.variable_declaration(astfunc, p[3])
+            #for row in data:
+            #    row['Type'] = p[3]
+            #return
 
         @self.pg.production('assignment : store_id COMMA assignment')
         @self.pg.production('assignment : store_id')
@@ -40,8 +43,9 @@ class Parser():
         @self.pg.production('store_id : LETTER')
         def store_id(p):
             var_name = p[0].getstr()
-            new_row = {'Variable': var_name, 'Type': None, 'Value': None}
-            data.append(new_row)
+            astfunc.store_id(astfunc, var_name)
+            #new_row = {'Variable': var_name, 'Type': None, 'Value': None}
+            #data.append(new_row)
             return
 
 
@@ -67,20 +71,13 @@ class Parser():
 
         @self.pg.production('write_statement : WRITE OPEN_PAREN expression CLOSE_PAREN end_sentence')
         def write_statement(p):
-            for row in data:
-                if p[2].getstr() in row.values():
-                    print(row['Value'])
-            return
+            return astfunc.write_instruction(astfunc, p[2].getstr())
 
+        
         @self.pg.production('variable_assignation : variable equal expression end_sentence')
         def variable_assignation(p):
-            for row in data:
-                if row['Variable'] == p[0].getstr():
-                    row['Value'] = p[2]
-            for row in data:
-                print(row)
-            print("value that reaches declaration : ", p[2])
-            return
+            return astfunc.variable_assignation(astfunc, p[0].getstr(), p[2])
+
 
         @self.pg.production('end_sentence : SEMI_COLON')
         @self.pg.production('end_sentence : SEMI_COLON declaration')
@@ -106,9 +103,9 @@ class Parser():
                 right = p[2]
                 operator = p[1]
                 if operator.gettokentype() == 'SUM':
-                    return Sum(left, right)
+                    return astfunc.Sum(left, right)
                 elif operator.gettokentype() == 'SUB':
-                    return Sub(left, right)
+                    return astfunc.Sub(left, right)
             else:
                 return p[0]
 
@@ -121,9 +118,9 @@ class Parser():
                 right = p[2]
                 operator = p[1]
                 if operator.gettokentype() == 'MULT':
-                    return Mult(left, right)
+                    return astfunc.Mult(left, right)
                 elif operator.gettokentype() == 'DIV':
-                    return Div(left, right)
+                    return astfunc.Div(left, right)
             else:
                 return p[0]
 
