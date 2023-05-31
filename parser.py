@@ -1,7 +1,8 @@
 from rply import ParserGenerator
 from ast import Sum, Sub, Mult, Div, Number, Write, Equal
 
-symbol_table = {}
+variable_table = {}
+values_table = {}
 
 
 class Parser():
@@ -11,7 +12,8 @@ class Parser():
             ['NUMBER', 'WRITE', 'OPEN_PAREN', 'CLOSE_PAREN',
              'SEMI_COLON', 'SUM', 'SUB', 'PROGRAM', 'DIV', 'MULT',
              'LETTER', 'MAIN', 'OPEN_BRACKET', 'CLOSE_BRACKET', 'EQUAL', 'VAR', 'COMMA', 'COLON',
-             'BEGIN', 'END', 'IF', 'ELSE', 'FOR', 'THEN', 'DO', 'WHILE', 'GREATER', 'LESS', 'INT', 'FLOAT', 'STRING', 'EMPTY']
+             'BEGIN', 'END', 'IF', 'ELSE', 'FOR', 'THEN', 'DO', 'WHILE', 'GREATER', 'LESS', 'INT', 'FLOAT', 'STRING',
+             'EMPTY']
         )
 
         precedence = [
@@ -34,86 +36,124 @@ class Parser():
 
     def parse(self):
         # @self.pg.production('program: PROGRAM OPEN_BRACKET assign block CLOSE_BRACKET')
-        @self.pg.production('program : PROGRAM MAIN OPEN_BRACKET assignment block CLOSE_BRACKET')
+        @self.pg.production('program : PROGRAM MAIN OPEN_BRACKET variabledeclaration block CLOSE_BRACKET')
         # @self.pg.production('program : PROGRAM MAIN OPEN_BRACKET statement SEMI_COLON CLOSE_BRACKET')
         def program(p):
+            return p[5]
+
+        @self.pg.production('variabledeclaration : VAR assignment COLON type SEMI_COLON')
+        def variable_declaration(p):
+            #variable_table[values_table][p[3]] = None
+            for var_name in values_table:
+                values_table[var_name][p[3]] = None
+            print("values Table:", values_table)
             return
 
-        @self.pg.production('assignment : VAR LETTER assignment2')
+        @self.pg.production('assignment : LETTER COMMA assignment')
+        @self.pg.production('assignment : LETTER')
+        @self.pg.production('assignment : EMPTY')
         def assignment(p):
-            return
+            if len(p) > 2:
+                var_name = p[0].getstr()
+                values_table[var_name] = {}
+            elif p[0].gettokentype() == 'LETTER':
+                var_name = p[0].getstr()
+                values_table[var_name] = {}
+            else:
+                return
 
-        @self.pg.production('assignment2 : COMMA LETTER assignment2')
-        @self.pg.production('assignment2 : COLON INT SEMI_COLON')
-        @self.pg.production('assignment2 : COLON FLOAT SEMI_COLON')
-        @self.pg.production('assignment2 : COLON STRING SEMI_COLON')
-        def assignment2(p):
-            return
+        @self.pg.production('type : FLOAT')
+        @self.pg.production('type : INT')
+        @self.pg.production('type : STRING')
+        def type(p):
+            return p[0].getstr()
+
 
         @self.pg.production('block : BEGIN SEMI_COLON declaration END SEMI_COLON')
         def block(p):
-            return
+            return p[2]
 
-        @self.pg.production('declaration : variable equalsign expression')
-        @self.pg.production('declaration : IF expression THEN declaration declaration2')
-        @self.pg.production('declaration : WHILE expression DO declaration')
-        @self.pg.production('declaration : FOR OPEN_PAREN LETTER equalsign expression SEMI_COLON'
-                            ' expression SEMI_COLON expression CLOSE_PAREN DO declaration')
-        @self.pg.production('declaration : declaration2')
-        @self.pg.production('declaration : WRITE OPEN_PAREN expression CLOSE_PAREN')
-        def declaration(p):
+        @self.pg.production('declaration : variable equal expression SEMI_COLON')
+        def variable_assignation(p):
+            #values_table[p[0].getstr()]["int"] = p[2]
+            print("value that reaches declaration : ", p[2])
+            print("variable that is assigned: ", values_table[p[0].getstr()])
             return
+        #@self.pg.production('declaration : IF expression THEN declaration declaration2')
+        #@self.pg.production('declaration : WHILE expression DO declaration')
+        #@self.pg.production('declaration : FOR OPEN_PAREN LETTER equal expression SEMI_COLON'
+        #                    ' expression SEMI_COLON expression CLOSE_PAREN DO declaration')
+        #@self.pg.production('declaration : declaration2')
+        @self.pg.production('declaration : WRITE OPEN_PAREN expression CLOSE_PAREN SEMI_COLON')
+        def write_statement(p):
+            return #Write(p[2])
 
-        @self.pg.production('declaration2 : EMPTY')
-        @self.pg.production('declaration2 : ELSE declaration')
-        @self.pg.production('declaration2 : declaration')
 
-        def declaration2(p):
-            return
+        #@self.pg.production('declaration2 : EMPTY')
+        #@self.pg.production('declaration2 : ELSE declaration')
+        #@self.pg.production('declaration2 : declaration')
+        #def declaration2(p):
+        #    return
 
         @self.pg.production('expression : simple GREATER simple')
         @self.pg.production('expression : simple LESS simple')
         @self.pg.production('expression : simple equality simple')
         @self.pg.production('expression : simple')
         def expression(p):
-            return
+            if len(p) == 1:
+                print("expression: ", p[0])
+                return p[0]
+            else:
+                return
+
 
         @self.pg.production('simple : term SUM term')
         @self.pg.production('simple : term SUB term')
         @self.pg.production('simple : term')
         def simple(p):
-            left = p[0]
-            right = p[2]
-            operator = p[1]
-            if operator.gettokentype() == 'SUM':
-                return Sum(left, right)
-            elif operator.gettokentype() == 'SUB':
-                return Sub(left, right)
+            if len(p) > 1:
+                left = p[0]
+                right = p[2]
+                operator = p[1]
+                if operator.gettokentype() == 'SUM':
+                    return Sum(left, right)
+                elif operator.gettokentype() == 'SUB':
+                    return Sub(left, right)
+            else:
+                print("simple: ", p[0])
+                return p[0]
+
 
         @self.pg.production('term : factor MULT factor')
         @self.pg.production('term : factor DIV factor')
         @self.pg.production('term : factor')
         def term(p):
-            left = p[0]
-            right = p[2]
-            operator = p[1]
-            if operator.gettokentype() == 'MULT':
-                return Mult(left, right)
-            elif operator.gettokentype() == 'DIV':
-                return Div(left, right)
+            if len(p) > 1:
+                left = p[0]
+                right = p[2]
+                operator = p[1]
+                if operator.gettokentype() == 'MULT':
+                    return Mult(left, right)
+                elif operator.gettokentype() == 'DIV':
+                    return Div(left, right)
+            else:
+                print("term: ", p[0])
+                return p[0]
 
         @self.pg.production('factor : NUMBER')
         def number(p):
-            return Number(p[0].value)
+            print("factor", p[0])
+            return p[0].value
 
         @self.pg.production('variable : LETTER')
         @self.pg.production('factor : LETTER')
         def variable(p):
-            var_name = p[0].getstr()
-            return locals().get(var_name)
+            var_name = p[0]
+            print("variable", var_name)
+            return var_name
 
-        @self.pg.production('equalsign : COLON EQUAL')
-        def equalsign(p):
+        @self.pg.production('equal : COLON EQUAL')
+        def equal(p):
             return
 
         @self.pg.production('equality : EQUAL')
