@@ -1,5 +1,5 @@
 
-
+data = []
 class Number():
     def __init__(self, value):
         self.value = value
@@ -41,9 +41,11 @@ class Equal(BinaryOp):
         return self.left.eval() % self.right.eval()
 
 
-class Write():
+class Write(Number):
     def __init__(self, value):
         self.value = value
+        
+    print(Number)
 
     def eval(self):
         print(self.value.eval())
