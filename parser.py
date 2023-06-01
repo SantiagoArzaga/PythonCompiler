@@ -24,7 +24,7 @@ class Parser():
     def parse(self):
         @self.pg.production('program : PROGRAM MAIN OPEN_BRACKET variable_declaration block CLOSE_BRACKET')
         def program(p):
-            astfunc.program_end(astfunc)
+            astfunc.program_end(astfunc, None)
             return p[5]
 
         @self.pg.production('variable_declaration : VAR assignment COLON type SEMI_COLON')
@@ -73,23 +73,28 @@ class Parser():
         @self.pg.production('write_statement : WRITE OPEN_PAREN QUOTE expression QUOTE CLOSE_PAREN end_sentence')
         def write_statement(p):
             if len(p) == 5:
-                return astfunc.write_instruction(astfunc, p[2].getstr(), "var")
+                astfunc.write_instruction(astfunc, p[2].getstr(), "var")
+                return
             else:
-                return astfunc.write_instruction(astfunc, p[3].getstr(), "string")
+                astfunc.write_instruction(astfunc, p[3].getstr(), "string")
+                return
 
         
         @self.pg.production('variable_assignation : variable equal expression end_sentence')
         def variable_assignation(p):
             return astfunc.variable_assignation(astfunc, p[0].getstr(), p[2])
 
-        @self.pg.production('if_statement : IF expression THEN declaration')
+        @self.pg.production('if_statement : IF OPEN_PAREN expression CLOSE_PAREN THEN open_bracket declaration end_sentence')
         def if_statement(p):
-            #return astfunc.sub(p[1])
-            return
+            return astfunc.if_statement(astfunc, p[2])
 
         @self.pg.production('end_sentence : SEMI_COLON')
         @self.pg.production('end_sentence : SEMI_COLON declaration')
+        @self.pg.production('end_sentence : close_bracket declaration')
+        @self.pg.production('end_sentence : close_bracket')
         def end_sentence(p):
+            #if p[0].gettokentype() == 'CLOSE_BRACKET':
+            #    astfunc.end_statement(astfunc)
             return p[0]
 
         @self.pg.production('expression : simple GREATER simple')
@@ -149,18 +154,22 @@ class Parser():
             var_name = p[0]
             return var_name
 
-        @self.pg.production('factor : string')
-        @self.pg.production('string : LETTER string')
-        @self.pg.production('string : LETTER')
-        def stringvariable(p):
-            return
-
         @self.pg.production('equal : COLON EQUAL')
         def equal(p):
             return
 
         @self.pg.production('equality : EQUAL')
         def equality(p):
+            return
+
+        @self.pg.production('open_bracket : OPEN_BRACKET')
+        def open_bracket(p):
+            astfunc.begin_statement(astfunc)
+            return
+
+        @self.pg.production('close_bracket : CLOSE_BRACKET')
+        def close_bracket(p):
+            astfunc.end_statement(astfunc)
             return
 
         @self.pg.error
