@@ -58,7 +58,10 @@ class AbstractSyntaxTree():
         new_row = {'Instruction': "if", 'Op1': None, 'Op2': None, 'Result': statement}
         quad.append(new_row)
         return
-
+    def while_statement(self, statement):
+        new_row = {'Instruction': "while", 'Op1': None, 'Op2': None, 'Result': statement}
+        quad.append(new_row)
+        return
     def write_instruction(self, statement, type):
         if type == "string":
             new_row = {'Instruction': "WriteStr", 'Value': statement}
@@ -152,15 +155,22 @@ class AbstractSyntaxTree():
                 #print("write var")
                 print(row['Result'])
             elif row['Instruction'] == "if":
-
+                result = get_value(row['Result'], struct)
+                print(result)
+                #if_temp_quad = generate_temp_quad(struct)
+                #struct = remove_statement_rows(struct)
+                #if result:
+                    #self.program_end(self, if_temp_quad)
+                    #if_temp_quad.clear()
+            """
+            elif row['Instruction'] == "while":
                 result = get_value(row['Result'], struct)
                 temp_quad = generate_temp_quad(struct)
                 struct = remove_statement_rows(struct)
-
                 if result:
-                    self.program_end(self, temp_quad)
-                else:
-                    print("IF is false")
+                    print("TRUE WHILE") """
+                    #self.program_end(self, temp_quad)
+
 
                 #depending on result, evaluate quad from begin state to end state, then continue
 
@@ -171,39 +181,39 @@ class AbstractSyntaxTree():
 
 #-------------------------------------------------------------------------------------------------------------------
 #get value from a pointer or string
-def get_value(value, quad):
+def get_value(value, quad_list1):
     if type(value) is Token:
-        get_value(value.getstr())
+        get_value(value.getstr(),quad_list1)
     elif type(value) is int:
-        return quad[value]['Result']
+        return quad_list1[value]['Result']
     elif value.isnumeric():
         return int(value)
     else:
         #If the value is not a Token, not a pointer and not a "number" i.e. it's a variable string like "x"
         #then it gets the value of the pointer in the var quad row
-        for row in quad:
+        for row in quad_list1:
             if value == row['Op1']:
                 #change instruction to one that runs on the inverse quad
-                return get_value(row['Result'])
+                return get_value(row['Result'],quad_list1)
 
 
-def get_pointer(value, quad):
+def get_pointer(value, quad_list2):
     counter = 0
-    for row in quad:
+    for row in quad_list2:
         if value == row['Op1']:
             return counter
         else:
             counter += 1
 
-def generate_temp_quad(struct):
-    temp_quad = []
+def generate_temp_quad(data_list):
+    temp_quad1 = []
     empty_rows = 0
     empty_count = 0
     begin_count = 0
     end_count = 1
     begin_ptr = 0
     end_ptr = 0
-    for row in struct:
+    for row in data_list:
         if row['Instruction'] == "begin_state":
             begin_ptr = begin_count
             empty_rows = empty_count
@@ -214,18 +224,19 @@ def generate_temp_quad(struct):
             end_count += 1
             empty_count += 1
     while empty_rows > 0:
-        temp_quad.append({'Instruction': None, 'Op1': None, 'Op2': None, 'Result': None})
+        temp_quad1.append({'Instruction': None, 'Op1': None, 'Op2': None, 'Result': None})
         empty_rows -= 1
-    temp_quad.extend(struct[begin_ptr:end_ptr])
-    return temp_quad
+    temp_quad1.extend(data_list[begin_ptr:end_ptr+1])
+    temp_quad1.extend(data_list[begin_ptr:end_ptr+1])
+    return temp_quad1
 
-def remove_statement_rows(struct):
+def remove_statement_rows(data_list2):
     replacement_row = {'Instruction': None, 'Op1': None, 'Op2': None, 'Result': None}
     begin_count = 0
-    end_count = 1
+    end_count = 2
     begin_ptr = 0
     end_ptr = 0
-    for row in struct:
+    for row in data_list2:
         if row['Instruction'] == "begin_state":
             begin_ptr = begin_count
         elif row['Instruction'] == "end_state":
@@ -233,5 +244,5 @@ def remove_statement_rows(struct):
         else:
             begin_count += 1
             end_count += 1
-    struct[begin_ptr:end_ptr] = [replacement_row] * (end_ptr - begin_ptr)
-    return struct
+    data_list2[begin_ptr:end_ptr] = [replacement_row] * (end_ptr - begin_ptr)
+    return data_list2

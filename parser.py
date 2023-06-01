@@ -59,13 +59,14 @@ class Parser():
         def block(p):
             return p[2]
 
-        # @self.pg.production('declaration : WHILE expression DO declaration')
+
         # @self.pg.production('declaration : FOR OPEN_PAREN LETTER equal expression SEMI_COLON'
         #                    ' expression SEMI_COLON expression CLOSE_PAREN DO declaration')
         # @self.pg.production('declaration : declaration2')
         @self.pg.production('declaration : variable_assignation')
         @self.pg.production('declaration : write_statement')
         @self.pg.production('declaration : if_statement')
+        @self.pg.production('declaration : while_statement')
         def declaration(p):
             return
 
@@ -87,6 +88,10 @@ class Parser():
         @self.pg.production('if_statement : IF OPEN_PAREN expression CLOSE_PAREN THEN open_bracket declaration end_sentence')
         def if_statement(p):
             return astfunc.if_statement(astfunc, p[2])
+
+        @self.pg.production('while_statement : WHILE OPEN_PAREN expression CLOSE_PAREN DO open_bracket declaration end_sentence')
+        def while_statement(p):
+            return astfunc.while_statement(astfunc, p[2])
 
         @self.pg.production('end_sentence : SEMI_COLON')
         @self.pg.production('end_sentence : SEMI_COLON declaration')
