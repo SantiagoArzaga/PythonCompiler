@@ -1,5 +1,5 @@
 from rply import ParserGenerator
-from ast import Sum, Sub, Mult, Div, Number, Write, Equal
+#from ast import Sum, Sub, Mult, Div, Number, Write, Equal
 from ast import AbstractSyntaxTree as astfunc
 
 data = []
@@ -13,7 +13,7 @@ class Parser():
              'SEMI_COLON', 'SUM', 'SUB', 'PROGRAM', 'DIV', 'MULT',
              'LETTER', 'MAIN', 'OPEN_BRACKET', 'CLOSE_BRACKET', 'EQUAL', 'VAR', 'COMMA', 'COLON',
              'BEGIN', 'END', 'IF', 'ELSE', 'FOR', 'THEN', 'DO', 'WHILE', 'GREATER', 'LESS', 'INT', 'FLOAT', 'STRING',
-             'EMPTY']
+             'EMPTY', 'QUOTE', 'STRING']
         )
 
         precedence = [
@@ -59,25 +59,33 @@ class Parser():
         def block(p):
             return p[2]
 
-        # @self.pg.production('declaration : IF expression THEN declaration declaration2')
         # @self.pg.production('declaration : WHILE expression DO declaration')
         # @self.pg.production('declaration : FOR OPEN_PAREN LETTER equal expression SEMI_COLON'
         #                    ' expression SEMI_COLON expression CLOSE_PAREN DO declaration')
         # @self.pg.production('declaration : declaration2')
         @self.pg.production('declaration : variable_assignation')
         @self.pg.production('declaration : write_statement')
+        @self.pg.production('declaration : if_statement')
         def declaration(p):
             return
 
         @self.pg.production('write_statement : WRITE OPEN_PAREN expression CLOSE_PAREN end_sentence')
+        @self.pg.production('write_statement : WRITE OPEN_PAREN QUOTE expression QUOTE CLOSE_PAREN end_sentence')
         def write_statement(p):
-            return astfunc.write_instruction(astfunc, p[2].getstr())
+            if len(p) == 5:
+                return astfunc.write_instruction(astfunc, p[2].getstr(), "var")
+            else:
+                return astfunc.write_instruction(astfunc, p[3].getstr(), "string")
 
         
         @self.pg.production('variable_assignation : variable equal expression end_sentence')
         def variable_assignation(p):
             return astfunc.variable_assignation(astfunc, p[0].getstr(), p[2])
 
+        @self.pg.production('if_statement : IF expression THEN declaration')
+        def if_statement(p):
+            #return astfunc.sub(p[1])
+            return
 
         @self.pg.production('end_sentence : SEMI_COLON')
         @self.pg.production('end_sentence : SEMI_COLON declaration')
@@ -87,12 +95,19 @@ class Parser():
         @self.pg.production('expression : simple GREATER simple')
         @self.pg.production('expression : simple LESS simple')
         @self.pg.production('expression : simple equality simple')
+        @self.pg.production('expression : expression expression')
         @self.pg.production('expression : simple')
         def expression(p):
-            if len(p) == 1:
-                return p[0]
+            if len(p) > 1:
+                left = p[0]
+                right = p[2]
+                operator = p[1]
+                if operator.gettokentype() == 'GREATER':
+                    return astfunc.Greater(astfunc, left, right)
+                elif operator.gettokentype() == 'LESS':
+                    return astfunc.Less(astfunc,left, right)
             else:
-                return
+                return p[0]
 
         @self.pg.production('simple : term SUM term')
         @self.pg.production('simple : term SUB term')
@@ -103,9 +118,9 @@ class Parser():
                 right = p[2]
                 operator = p[1]
                 if operator.gettokentype() == 'SUM':
-                    return astfunc.Sum(left, right)
+                    return astfunc.Sum(astfunc,left, right)
                 elif operator.gettokentype() == 'SUB':
-                    return astfunc.Sub(left, right)
+                    return astfunc.Sub(astfunc,left, right)
             else:
                 return p[0]
 
@@ -118,9 +133,9 @@ class Parser():
                 right = p[2]
                 operator = p[1]
                 if operator.gettokentype() == 'MULT':
-                    return astfunc.Mult(left, right)
+                    return astfunc.Mult(astfunc,left, right)
                 elif operator.gettokentype() == 'DIV':
-                    return astfunc.Div(left, right)
+                    return astfunc.Div(astfunc,left, right)
             else:
                 return p[0]
 
@@ -133,6 +148,12 @@ class Parser():
         def variable(p):
             var_name = p[0]
             return var_name
+
+        @self.pg.production('factor : string')
+        @self.pg.production('string : LETTER string')
+        @self.pg.production('string : LETTER')
+        def stringvariable(p):
+            return
 
         @self.pg.production('equal : COLON EQUAL')
         def equal(p):

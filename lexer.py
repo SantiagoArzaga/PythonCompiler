@@ -39,6 +39,8 @@ class Lexer():
         self.lexer.add('PERIOD', r'\.')
         self.lexer.add('COMMA', r'\,')
 
+        self.lexer.add('QUOTE', r'\"')
+
 
         # Operators
         self.lexer.add('SUM', r'\+')
@@ -51,6 +53,7 @@ class Lexer():
 
         self.lexer.add('LETTER', r'[a-zA-Z_]+')
         self.lexer.add('EMPTY', r'""')
+        self.lexer.add("STRING", r"\"(\\.|[^\"\\])*\"")
 
         # Number
         self.lexer.add('NUMBER', r'\d+')
