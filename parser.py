@@ -68,19 +68,21 @@ class Parser():
         @self.pg.production('declaration : if_statement')
         @self.pg.production('declaration : while_statement')
         def declaration(p):
-            return
+            return p[0]
 
-        @self.pg.production('write_statement : WRITE OPEN_PAREN expression CLOSE_PAREN end_sentence')
-        @self.pg.production('write_statement : WRITE OPEN_PAREN QUOTE expression QUOTE CLOSE_PAREN end_sentence')
+        @self.pg.production('write_statement : write OPEN_PAREN expression CLOSE_PAREN end_sentence')
+        @self.pg.production('write_statement : write OPEN_PAREN QUOTE expression QUOTE CLOSE_PAREN end_sentence')
         def write_statement(p):
             if len(p) == 5:
                 astfunc.write_instruction(astfunc, p[2].getstr(), "var")
-                return
             else:
                 astfunc.write_instruction(astfunc, p[3].getstr(), "string")
-                return
 
-        
+        @self.pg.production('write : WRITE')
+        def write(p):
+            return
+            #astfunc.write_instruction(astfunc, "cosa", "string")
+
         @self.pg.production('variable_assignation : variable equal expression end_sentence')
         def variable_assignation(p):
             return astfunc.variable_assignation(astfunc, p[0].getstr(), p[2])
@@ -151,12 +153,14 @@ class Parser():
 
         @self.pg.production('factor : NUMBER')
         def number(p):
+            #astfunc.expression_instruction(astfunc, p[0].value)
             return p[0].value
 
         @self.pg.production('variable : LETTER')
         @self.pg.production('factor : LETTER')
         def variable(p):
             var_name = p[0]
+            #astfunc.expression_instruction(astfunc, var_name.getstr())
             return var_name
 
         @self.pg.production('equal : COLON EQUAL')
@@ -169,12 +173,12 @@ class Parser():
 
         @self.pg.production('open_bracket : OPEN_BRACKET')
         def open_bracket(p):
-            astfunc.begin_statement(astfunc)
+            astfunc.end_statement(astfunc)
             return
 
         @self.pg.production('close_bracket : CLOSE_BRACKET')
         def close_bracket(p):
-            astfunc.end_statement(astfunc)
+            astfunc.begin_statement(astfunc)
             return
 
         @self.pg.error
