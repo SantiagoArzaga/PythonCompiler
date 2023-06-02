@@ -2,8 +2,10 @@ from rply import Token
 
 data = []
 instructions = [{'Instruction': None, 'Value': None}]
+
 expression_quad = []
 quad = []
+ignore_list = []
 
 
 # 0 mult 3 4 12
@@ -58,8 +60,8 @@ class AbstractSyntaxTree():
         #div = int(left) / int(right)
         return len(expression_quad) - 1
 
-    def if_statement(self, statement):
-        new_row = {'Instruction': "if", 'Op1': None, 'Op2': None, 'Result': statement}
+    def if_statement(self, begin, end, statement):
+        new_row = {'Instruction': "if", 'Op1': begin, 'Op2': end, 'Result': statement}
         quad.append(new_row)
         return
     def while_statement(self, statement):
@@ -100,11 +102,11 @@ class AbstractSyntaxTree():
     def begin_statement(self):
         new_row = {'Instruction': "begin_state", 'Op1': "1", 'Op2': "1", 'Result': len(quad)}
         quad.append(new_row)
-        return
+        return len(quad) - 1
     def end_statement(self):
         new_row = {'Instruction': "end_state", 'Op1': "1", 'Op2': "1", 'Result': len(quad)}
         quad.append(new_row)
-        return
+        return len(quad) - 1
     def program_end(self, struct):
         #if struct == None:
         #    struct = quad
@@ -116,7 +118,19 @@ class AbstractSyntaxTree():
         for row3 in struct:
             print(row3)
         print("--------------PROGRAM----------------")
+        skip = False
+        end_row_index = None
         for row in reversed(quad):
+            for ignore_row in ignore_list:
+                if row == ignore_row:
+                    skip = True
+                    break
+                else:
+                    skip = False
+            if skip:
+                #print("Skipping row", row)
+                continue
+
             if row['Instruction'] == "writestr":
                 # print("write var")
                 print(row['Result'])
@@ -129,6 +143,7 @@ class AbstractSyntaxTree():
                 #si cualquier operador tiene ptr correr la misma funcion
                 #print(result)
             elif row['Instruction'] == "writevar":
+                #print("writevar")
                 for row2 in reversed(quad):
                     if row2['Op1'] == row['Result']:
                         print(row2['Result'])
@@ -140,29 +155,17 @@ class AbstractSyntaxTree():
                 var_retrieved_value = evaluate_row(retrieve_ptr_row(row['Result'], struct))
                 row['Result'] = var_retrieved_value
                 #print(var_retrieved_value)
-                skip = True
                 if int(var_retrieved_value) == 1:
-                    print("True")
+                    #crear un ignore list con las rows
+                    skip = False
                 else:
-                    print("False")
-                    if skip:
-                        if row['Instruction'] != "end_statement":
-                            print("Skipped row", row)
-                            continue
-                        else:
-                            skip = False
-
-                    print("False")
+                    add_to_ignore_list(quad, row['Op2'], row['Op1'])
+                    skip = True
+                    #print("False")
             #elif row['Instruction'] == "begin_state":
                 #result = get_value(row['Result'], struct)
                 #print(result)
 
-        print("dick")
-        for row in reversed(quad):
-            print(row)
-
-        for row3 in struct:
-            print(row3)
 
 
             """
@@ -231,13 +234,12 @@ class AbstractSyntaxTree():
 
         #print("Value of x ", get_value("x"))
         #print("=====================")
-        #for row in struct:
+        #for row in ignore_list:
         #    print(row)
 
 #-------------------------------------------------------------------------------------------------------------------
-#get value from a pointer or stri
-# ng
 
+#Returns the row of a given pointer
 def retrieve_ptr_row(ptr, quad_struct):
     counter = 0
     for row in quad_struct:
@@ -259,10 +261,9 @@ def evaluate_row(row):
     """
     for brow in expression_quad:
         print(brow)
-    print("Row is " , row)
     print("----------") """
-    if row['Op1'] is None:
-        print("Row is empty")
+    if row is None:
+        return 1
     if type(row['Op1']) is int:
         value1 = retrieve_ptr_row(row['Op1'], expression_quad)
         row['Op1'] = evaluate_row(value1)
@@ -298,10 +299,9 @@ def calculate_row(row):
     return str(int(row['Result']))
 
 
-
-
-
-
+def add_to_ignore_list(struct, begin, end):
+    for i in range(begin, end + 1):  # Range from index 1 to 3 (exclusive)
+        ignore_list.append(struct[i])
 
 
 
