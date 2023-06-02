@@ -64,6 +64,11 @@ class AbstractSyntaxTree():
         new_row = {'Instruction': "if", 'Op1': begin, 'Op2': end, 'Result': statement}
         quad.append(new_row)
         return
+
+    def else_statement(self, begin, end):
+        new_row = {'Instruction': "else", 'Op1': begin, 'Op2': end, 'Result': len(quad) + 1}
+        quad.append(new_row)
+        return
     def while_statement(self, statement):
         new_row = {'Instruction': "while", 'Op1': None, 'Op2': None, 'Result': statement}
         quad.append(new_row)
@@ -119,7 +124,6 @@ class AbstractSyntaxTree():
             print(row3)
         print("--------------PROGRAM----------------")
         skip = False
-        end_row_index = None
         for row in reversed(quad):
             for ignore_row in ignore_list:
                 if row == ignore_row:
@@ -128,7 +132,6 @@ class AbstractSyntaxTree():
                 else:
                     skip = False
             if skip:
-                #print("Skipping row", row)
                 continue
 
             if row['Instruction'] == "writestr":
@@ -162,77 +165,18 @@ class AbstractSyntaxTree():
                     add_to_ignore_list(quad, row['Op2'], row['Op1'])
                     skip = True
                     #print("False")
-            #elif row['Instruction'] == "begin_state":
-                #result = get_value(row['Result'], struct)
-                #print(result)
-
-
-
-            """
-        for row in struct:
-            if row['Instruction'] == "mult":
-                #print("mult")
-                row['Result'] = get_value(row['Op1'], struct) * get_value(row['Op2'], struct)
-                #print(row['Result'])
-            elif row['Instruction'] == "div":
-                #print("div")
-                row['Result'] = get_value(row['Op1'], struct) / get_value(row['Op2'], struct)
-                #print(row['Result'])
-            elif row['Instruction'] == "sum":
-                #print("sum")
-                row['Result'] = get_value(row['Op1'], struct) + get_value(row['Op2'], struct)
-                #print(row['Result'])
-            elif row['Instruction'] == "sub":
-                #print("sub")
-                row['Result'] = get_value(row['Op1'], struct) - get_value(row['Op2'], struct)
-                #print(row['Result'])
-            elif row['Instruction'] == "greater":
-                #print("sub")
-                row['Result'] = get_value(row['Op1'], struct) > get_value(row['Op2'], struct)
-                #print(row['Result'])
-            elif row['Instruction'] == "less":
-                #print("sub")
-                row['Result'] = get_value(row['Op1'], struct) < get_value(row['Op2'], struct)
-                #print(row['Result']) """
-
-        """
-        for row in reversed(struct):
-            if row['Instruction'] == "writevar":
-                #print("write var")
-                row['Result'] = get_pointer(row['Result'], struct)
-                variable_pointer = get_value(row['Result'], struct)
-                result = get_value(variable_pointer, struct)
-                print(result)
-            elif row['Instruction'] == "writestr":
-                #print("write var")
-                print(row['Result'])
-            elif row['Instruction'] == "if":
-                result = get_value(row['Result'], struct)
-                print(result) """
-                #for row in reversed(struct):
-                #    if row['Instruction'] == "begin_state":
-                #        begin_ptr = row['Result']
-                #    elif row['Instruction'] == "end_state":
-                #        end_ptr = row['Result']
-                #temporal = generate_temp_quad()
-                #struct = remove_statement_rows(struct)
-                #if result:
-                    #print(begin_ptr, end_ptr)
-                    #self.program_end(self, temporal)
-                    #if_quad.clear()
-            #"""
-            #elif row['Instruction'] == "while":
-            #    result = get_value(row['Result'], struct)
-            #    temp_quad = generate_temp_quad(struct)
-            #    struct = remove_statement_rows(struct)
-            #    if result:
-            #        print("TRUE WHILE") """
-                    #self.program_end(self, temp_quad)
+            elif row['Instruction'] == "else":
+                #print("else")
+                if_row = retrieve_ptr_row(row['Result'], quad)
+                #print("Cosa", if_row['Result'])
+                if if_row['Result'] == "0":
+                    continue
+                else:
+                    add_to_ignore_list(quad, row['Op2'], row['Op1'])
 
 
                 #depending on result, evaluate quad from begin state to end state, then continue
 
-        #print("Value of x ", get_value("x"))
         #print("=====================")
         #for row in ignore_list:
         #    print(row)

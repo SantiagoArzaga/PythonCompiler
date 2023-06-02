@@ -89,13 +89,12 @@ class Parser():
 
         @self.pg.production('if_statement : IF OPEN_PAREN expression CLOSE_PAREN THEN open_bracket declaration end_if_sentence')
         def if_statement(p):
-            print(p[5])
+            #print(p[5])
             return astfunc.if_statement(astfunc, p[7], p[5], p[2])
 
         @self.pg.production('else_statement : ELSE open_bracket declaration end_sentence')
-        def if_statement(p):
-            print(p[5])
-            return astfunc.if_statement(astfunc, p[7], p[5], p[2])
+        def else_statement(p):
+            return astfunc.else_statement(astfunc, p[3], p[1])
 
         @self.pg.production('while_statement : WHILE OPEN_PAREN expression CLOSE_PAREN DO open_bracket declaration end_sentence')
         def while_statement(p):

@@ -7,12 +7,14 @@ program main{
                 n := f + 1;
                 write(f);
                 write(x);
-                if(2 > 1) then {
+                if(2 < 1) then {
                     i := 1;
                     write("trueif");
                     if(6 > 1) then {
                         write("trueifdos");
                     }
+                }else{
+                    write("trueelse");
                 }
                 if(2 < 1) then {
                     write("falseif");
