@@ -87,7 +87,12 @@ class Parser():
         def variable_assignation(p):
             return astfunc.variable_assignation(astfunc, p[0].getstr(), p[2])
 
-        @self.pg.production('if_statement : IF OPEN_PAREN expression CLOSE_PAREN THEN open_bracket declaration end_sentence')
+        @self.pg.production('if_statement : IF OPEN_PAREN expression CLOSE_PAREN THEN open_bracket declaration end_if_sentence')
+        def if_statement(p):
+            print(p[5])
+            return astfunc.if_statement(astfunc, p[7], p[5], p[2])
+
+        @self.pg.production('else_statement : ELSE open_bracket declaration end_sentence')
         def if_statement(p):
             print(p[5])
             return astfunc.if_statement(astfunc, p[7], p[5], p[2])
@@ -96,13 +101,17 @@ class Parser():
         def while_statement(p):
             return astfunc.while_statement(astfunc, p[2])
 
+        @self.pg.production('end_if_sentence : close_bracket declaration')
+        @self.pg.production('end_if_sentence : close_bracket else_statement')
+        @self.pg.production('end_if_sentence : close_bracket')
+        def end_if_sentence(p):
+            return p[0]
+
         @self.pg.production('end_sentence : SEMI_COLON')
         @self.pg.production('end_sentence : SEMI_COLON declaration')
-        @self.pg.production('end_sentence : close_bracket declaration')
         @self.pg.production('end_sentence : close_bracket')
+        @self.pg.production('end_sentence : close_bracket declaration')
         def end_sentence(p):
-            #if p[0].gettokentype() == 'CLOSE_BRACKET':
-            #    astfunc.end_statement(astfunc)
             return p[0]
 
         @self.pg.production('expression : simple GREATER simple')

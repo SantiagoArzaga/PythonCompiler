@@ -10,12 +10,13 @@ program main{
                 if(2 > 1) then {
                     i := 1;
                     write("trueif");
+                    if(6 > 1) then {
+                        write("trueifdos");
+                    }
                 }
                 if(2 < 1) then {
                     write("falseif");
                 }
-                if(6 > 1) then {
-                    write("trueifdos");
-                }
+
         end;
 }
