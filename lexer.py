@@ -41,19 +41,22 @@ class Lexer():
 
         self.lexer.add('QUOTE', r'\"')
 
+        self.lexer.add('EXCLAMATION', r'\!')
+
 
         # Operators
+        self.lexer.add('GREATEREQUAL', r'\>=')
+        self.lexer.add('LESSEQUAL', r'\<=')
         self.lexer.add('SUM', r'\+')
         self.lexer.add('SUB', r'\-')
-
         self.lexer.add('DIV', r'\/')
         self.lexer.add('MULT', r'\*')
         self.lexer.add('GREATER', r'\>')
         self.lexer.add('LESS', r'\<')
-
         self.lexer.add('LETTER', r'[a-zA-Z_]+')
         self.lexer.add('EMPTY', r'""')
         self.lexer.add("STRING", r"\"(\\.|[^\"\\])*\"")
+        self.lexer.add('INCREMENTAL', r'\++')
 
         # Number
         self.lexer.add('NUMBER', r'\d+')

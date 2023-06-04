@@ -13,13 +13,10 @@ class Parser():
              'SEMI_COLON', 'SUM', 'SUB', 'PROGRAM', 'DIV', 'MULT',
              'LETTER', 'MAIN', 'OPEN_BRACKET', 'CLOSE_BRACKET', 'EQUAL', 'VAR', 'COMMA', 'COLON',
              'BEGIN', 'END', 'IF', 'ELSE', 'FOR', 'THEN', 'DO', 'WHILE', 'GREATER', 'LESS', 'INT', 'FLOAT', 'STRING',
-             'EMPTY', 'QUOTE', 'STRING']
+             'EMPTY', 'QUOTE', 'STRING', 'EXCLAMATION', 'GREATEREQUAL', 'LESSEQUAL', 'INCREMENTAL']
         )
 
-        precedence = [
-            ('left', ['SUM', 'SUB']),
-            ('left', ['MULT', 'DIV'])
-        ]
+
 
     def parse(self):
         @self.pg.production('program : PROGRAM MAIN OPEN_BRACKET variable_declaration block CLOSE_BRACKET')
@@ -98,7 +95,7 @@ class Parser():
 
         @self.pg.production('while_statement : WHILE OPEN_PAREN expression CLOSE_PAREN DO open_bracket declaration end_sentence')
         def while_statement(p):
-            return astfunc.while_statement(astfunc, p[2])
+            return astfunc.while_statement(astfunc, p[7], p[5], p[2])
 
         @self.pg.production('end_if_sentence : close_bracket declaration')
         @self.pg.production('end_if_sentence : close_bracket else_statement')
@@ -114,8 +111,9 @@ class Parser():
             return p[0]
 
         @self.pg.production('expression : simple GREATER simple')
+        @self.pg.production('expression : simple GREATEREQUAL simple')
+        @self.pg.production('expression : simple LESSEQUAL simple')
         @self.pg.production('expression : simple LESS simple')
-        @self.pg.production('expression : simple equality simple')
         @self.pg.production('expression : expression expression')
         @self.pg.production('expression : simple')
         def expression(p):
@@ -123,10 +121,15 @@ class Parser():
                 left = p[0]
                 right = p[2]
                 operator = p[1]
+                print(operator)
                 if operator.gettokentype() == 'GREATER':
                     return astfunc.Greater(astfunc, left, right)
                 elif operator.gettokentype() == 'LESS':
                     return astfunc.Less(astfunc,left, right)
+                elif operator.gettokentype() == 'GREATEREQUAL':
+                    return astfunc.GreaterEqual(astfunc,left, right)
+                elif operator.gettokentype() == 'LESSEQUAL':
+                    return astfunc.LessEqual(astfunc,left, right)
             else:
                 return p[0]
 
@@ -174,10 +177,6 @@ class Parser():
 
         @self.pg.production('equal : COLON EQUAL')
         def equal(p):
-            return
-
-        @self.pg.production('equality : EQUAL')
-        def equality(p):
             return
 
         @self.pg.production('open_bracket : OPEN_BRACKET')

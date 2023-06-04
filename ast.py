@@ -1,11 +1,12 @@
 from rply import Token
 
-data = []
-instructions = [{'Instruction': None, 'Value': None}]
+# data = []
+# instructions = [{'Instruction': None, 'Value': None}]
 
 expression_quad = []
 quad = []
 ignore_list = []
+while_ignore_list = []
 
 
 # 0 mult 3 4 12
@@ -13,51 +14,83 @@ ignore_list = []
 class AbstractSyntaxTree():
     def __init__(self, value):
         self.value = value
+
     def expression_instruction(self, value):
         new_row = {'Instruction': "expression", 'Op1': None, 'Op2': None, 'Result': value}
         expression_quad.append(new_row)
-        #greater = int(left) > int(right)
+        # greater = int(left) > int(right)
         return len(quad) - 1
+
     def Greater(self, left, right):
         new_row = {'Instruction': "greater", 'Op1': left, 'Op2': right, 'Result': None}
         expression_quad.append(new_row)
-        #greater = int(left) > int(right)
+        # greater = int(left) > int(right)
         return len(expression_quad) - 1
 
     def Less(self, left, right):
         new_row = {'Instruction': "less", 'Op1': left, 'Op2': right, 'Result': None}
         expression_quad.append(new_row)
-        #less = int(left) < int(right)
+        # less = int(left) < int(right)
         return len(expression_quad) - 1
 
     def Equality(self, left, right):
         new_row = {'Instruction': "equality", 'Op1': left, 'Op2': right, 'Result': None}
         expression_quad.append(new_row)
-        #equality = left == right
+        # equality = left == right
+        return len(expression_quad) - 1
+
+    def Inequality(self, left, right):
+        new_row = {'Instruction': "inequality", 'Op1': left, 'Op2': right, 'Result': None}
+        expression_quad.append(new_row)
+        # equality = left == right
+        return len(expression_quad) - 1
+
+    def GreaterEqual(self, left, right):
+        new_row = {'Instruction': "greaterequal", 'Op1': left, 'Op2': right, 'Result': None}
+        expression_quad.append(new_row)
+        # equality = left == right
+        return len(expression_quad) - 1
+
+    def LessEqual(self, left, right):
+        new_row = {'Instruction': "lessequal", 'Op1': left, 'Op2': right, 'Result': None}
+        expression_quad.append(new_row)
+        # equality = left == right
+        return len(expression_quad) - 1
+
+    def Incremental(self, value):
+        new_row = {'Instruction': "incremental", 'Op1': value, 'Op2': "0", 'Result': None}
+        expression_quad.append(new_row)
+        # equality = left == right
+        return len(expression_quad) - 1
+
+    def Decremental(self, value):
+        new_row = {'Instruction': "decremental", 'Op1': value, 'Op2': "0", 'Result': None}
+        expression_quad.append(new_row)
+        # equality = left == right
         return len(expression_quad) - 1
 
     def Sum(self, left, right):
         new_row = {'Instruction': "sum", 'Op1': left, 'Op2': right, 'Result': None}
         expression_quad.append(new_row)
-        #sum = int(left) + int(right)
+        # sum = int(left) + int(right)
         return len(expression_quad) - 1
 
     def Sub(self, left, right):
         new_row = {'Instruction': "sub", 'Op1': left, 'Op2': right, 'Result': None}
         expression_quad.append(new_row)
-        #sub = int(left) - int(right)
+        # sub = int(left) - int(right)
         return len(expression_quad) - 1
 
     def Mult(self, left, right):
         new_row = {'Instruction': "mult", 'Op1': left, 'Op2': right, 'Result': None}
         expression_quad.append(new_row)
-        #mult = int(left) * int(right)
+        # mult = int(left) * int(right)
         return len(expression_quad) - 1
 
     def Div(self, left, right):
         new_row = {'Instruction': "div", 'Op1': left, 'Op2': right, 'Result': None}
         expression_quad.append(new_row)
-        #div = int(left) / int(right)
+        # div = int(left) / int(right)
         return len(expression_quad) - 1
 
     def if_statement(self, begin, end, statement):
@@ -69,10 +102,12 @@ class AbstractSyntaxTree():
         new_row = {'Instruction': "else", 'Op1': begin, 'Op2': end, 'Result': len(quad) + 1}
         quad.append(new_row)
         return
-    def while_statement(self, statement):
-        new_row = {'Instruction': "while", 'Op1': None, 'Op2': None, 'Result': statement}
+
+    def while_statement(self, begin, end, statement):
+        new_row = {'Instruction': "while", 'Op1': begin, 'Op2': end, 'Result': statement}
         quad.append(new_row)
         return
+
     def write_instruction(self, statement, type):
         if type == "string":
             new_row = {'Instruction': "WriteStr", 'Value': statement}
@@ -82,131 +117,84 @@ class AbstractSyntaxTree():
             new_row = {'Instruction': "WriteVar", 'Value': statement}
             quad_row = {'Instruction': "writevar", 'Op1': None, 'Op2': None, 'Result': statement}
             quad.append(quad_row)
-        instructions.append(new_row)
+        # instructions.append(new_row)
         return
 
     def store_id(self, var_name):
         new_row = {'Variable': var_name, 'Type': None, 'Value': None}
-        data.append(new_row)
+        # data.append(new_row)
         return
 
     def variable_declaration(self, type_value):
-        for row in data:
-            row['Type'] = type_value
+        # for row in data:
+        #    row['Type'] = type_value
         return
 
     def variable_assignation(self, variable, value):
         new_row = {'Instruction': "assign", 'Op1': variable, 'Op2': None, 'Result': value}
         quad.append(new_row)
-        for row in data:
-            if row['Variable'] == variable:
-                row['Value'] = value
-            # print("value that reaches declaration : ", p[2])
+        # for row in data:
+        #    if row['Variable'] == variable:
+        #        row['Value'] = value
+        # print("value that reaches declaration : ", p[2])
         return
 
     def begin_statement(self):
         new_row = {'Instruction': "begin_state", 'Op1': "1", 'Op2': "1", 'Result': len(quad)}
         quad.append(new_row)
         return len(quad) - 1
+
     def end_statement(self):
         new_row = {'Instruction': "end_state", 'Op1': "1", 'Op2': "1", 'Result': len(quad)}
         quad.append(new_row)
         return len(quad) - 1
+
     def program_end(self, struct):
-        #if struct == None:
-        #    struct = quad
-        struct = expression_quad
         print("--------------QUAD----------------")
         for row in reversed(quad):
             print(row)
         print("--------------OPQUAD----------------")
-        for row3 in struct:
+        for row3 in expression_quad:
             print(row3)
         print("--------------PROGRAM----------------")
-        skip = False
-        for row in reversed(quad):
-            for ignore_row in ignore_list:
-                if row == ignore_row:
-                    skip = True
-                    break
-                else:
-                    skip = False
-            if skip:
-                continue
-
-            if row['Instruction'] == "writestr":
-                # print("write var")
-                print(row['Result'])
-            elif row['Instruction'] == "assign":
-                #result = get_value(row['Result'], struct)
-                var_retrieved_value = evaluate_row(retrieve_ptr_row(row['Result'], struct))
-                #print("Value mafaca is ", var_retrieved_value)
-                row['Result'] = var_retrieved_value
-                #llamar funcion que corra la instruccion del ptr del resultado
-                #si cualquier operador tiene ptr correr la misma funcion
-                #print(result)
-            elif row['Instruction'] == "writevar":
-                #print("writevar")
-                for row2 in reversed(quad):
-                    if row2['Op1'] == row['Result']:
-                        print(row2['Result'])
-                #variable_pointer = get_value(row['Result'], struct)
-                #result = get_value(variable_pointer, struct)
-                #print(result)
-            elif row['Instruction'] == "if":
-                #print("if")
-                var_retrieved_value = evaluate_row(retrieve_ptr_row(row['Result'], struct))
-                row['Result'] = var_retrieved_value
-                #print(var_retrieved_value)
-                if int(var_retrieved_value) == 1:
-                    #crear un ignore list con las rows
-                    skip = False
-                else:
-                    add_to_ignore_list(quad, row['Op2'], row['Op1'])
-                    skip = True
-                    #print("False")
-            elif row['Instruction'] == "else":
-                #print("else")
-                if_row = retrieve_ptr_row(row['Result'], quad)
-                #print("Cosa", if_row['Result'])
-                if if_row['Result'] == "0":
-                    continue
-                else:
-                    add_to_ignore_list(quad, row['Op2'], row['Op1'])
-
-
-                #depending on result, evaluate quad from begin state to end state, then continue
-
-        #print("=====================")
-        #for row in ignore_list:
+        evaluate_instructions(quad)
+        print("--------------OPQUAD----------------")
+        for row3 in expression_quad:
+            print(row3)
+        # print("=====================")
+        # for row in ignore_list:
         #    print(row)
 
-#-------------------------------------------------------------------------------------------------------------------
 
-#Returns the row of a given pointer
+# -------------------------------------------------------------------------------------------------------------------
+
+# Returns the row of a given pointer
 def retrieve_ptr_row(ptr, quad_struct):
     counter = 0
     for row in quad_struct:
         if counter == ptr:
-            #print(row)
+            # print(row)
             return row
-            #eval
+            # eval
         else:
             counter += 1
     return
+
 
 def retrieve_token_value(tokenstring):
     for row in quad:
         if tokenstring == row['Op1']:
             return row['Result']
 
-#Checks if row has pointers if not it calculates the result of the row
+
+# Checks if row has pointers if not it calculates the result of the row
 def evaluate_row(row):
     """
     for brow in expression_quad:
         print(brow)
     print("----------") """
     if row is None:
+        print("row is none")
         return 1
     if type(row['Op1']) is int:
         value1 = retrieve_ptr_row(row['Op1'], expression_quad)
@@ -219,13 +207,14 @@ def evaluate_row(row):
     if type(row['Op2']) is Token:
         row['Op2'] = retrieve_token_value(row['Op2'].getstr())
     resultado = calculate_row(row)
-    #print("Result from row ", resultado)
-    #print("=====================aaaaaaaaaaaaaaaaaaaaaaaaaa")
-    return resultado #calculate_row(row)
+    # print("Result from row ", resultado)
+    # print("=====================aaaaaaaaaaaaaaaaaaaaaaaaaa")
+    return resultado  # calculate_row(row)
+
 
 def calculate_row(row):
-    #print("Operand 1 value is ", row['Op1'])
-    #print("Operand 2 value is ", row['Op2'])
+    # print("Operand 1 value is ", row['Op1'])
+    # print("Operand 2 value is ", row['Op2'])
     value1 = int(row['Op1'])
     value2 = int(row['Op2'])
     if row['Instruction'] == "mult":
@@ -240,6 +229,18 @@ def calculate_row(row):
         row['Result'] = value1 > value2
     elif row['Instruction'] == "less":
         row['Result'] = value1 < value2
+    elif row['Instruction'] == "equality":
+        row['Result'] = value1 == value2
+    elif row['Instruction'] == "inequality":
+        row['Result'] = value1 != value2
+    elif row['Instruction'] == "greaterequal":
+        row['Result'] = value1 >= value2
+    elif row['Instruction'] == "lessequal":
+        row['Result'] = value1 <= value2
+    elif row['Instruction'] == "incremental":
+        row['Result'] = value1 + 1
+    elif row['Instruction'] == "decremental":
+        row['Result'] = value1 - 1
     return str(int(row['Result']))
 
 
@@ -248,10 +249,82 @@ def add_to_ignore_list(struct, begin, end):
         ignore_list.append(struct[i])
 
 
+def add_to_ignore_list_reversed(struct, begin, end):
+    for i, value in enumerate(struct):
+        if begin <= i <= end:
+            continue
+        while_ignore_list.append(struct[i])
 
 
+def remove_from_ignore_list():
+    return
 
 
+def evaluate_instructions(struct):
+    skip = False
+    for row in reversed(struct):
+        for ignore_row in ignore_list:
+            if row == ignore_row:
+                skip = True
+                break
+            else:
+                skip = False
+        if skip:
+            continue
+        if row['Instruction'] == "writestr":
+            # print("write var")
+            print(row['Result'])
+        elif row['Instruction'] == "assign":
+            if type(row['Result']) is int:
+                var_retrieved_value = evaluate_row(retrieve_ptr_row(row['Result'], expression_quad))
+                row['Result'] = var_retrieved_value
+            else:
+                continue
+        elif row['Instruction'] == "writevar":
+            # print("writevar")
+            for row2 in reversed(struct):
+                if row2['Op1'] == row['Result']:
+                    print(row2['Result'])
+        elif row['Instruction'] == "if":
+            # print("if")
+            var_retrieved_value = evaluate_row(retrieve_ptr_row(row['Result'], expression_quad))
+            row['Result'] = var_retrieved_value
+            if int(var_retrieved_value) == 1:
+                skip = False
+            else:
+                add_to_ignore_list(struct, row['Op2'], row['Op1'])
+                skip = True
+        elif row['Instruction'] == "else":
+            # print("else")
+            if_row = retrieve_ptr_row(row['Result'], struct)
+            if if_row['Result'] == "0":
+                continue
+            else:
+                add_to_ignore_list(struct, row['Op2'], row['Op1'])
+        elif row['Instruction'] == "while":
+            # print("while")
+            # revisar statement de while
+            var_retrieved_value = evaluate_row(retrieve_ptr_row(row['Result'], expression_quad))
+            row['Result'] = var_retrieved_value
+            # if true
+            # print("Retrieved while bool", var_retrieved_value)
+            if int(var_retrieved_value) == 1:
+                add_to_ignore_list_reversed(struct, row['Op2'], row['Op1'])
+                print("===========While Ignore List==========")
+                for row2 in while_ignore_list:
+                    print(row2)
+                print("======================================")
+            # añadir lo que no sea el bloque a la ignore_list
+            # evaluar instrucciones de nuevo con  evaluate instruction y
+            # probablemente alterar el statement del while con el codigo del bloque
+            # else
+            # eliminar valores del ignore list
+            # continuar la ejecucion
+            return
+    return
+
+
+"""
 def get_value(value, quad_struct):
     if type(value) is Token:
         get_value(value.getstr(),quad_struct)
@@ -306,4 +379,4 @@ def remove_statement_rows(data_list2):
         elif row['Instruction'] == "end_state":
             end_ptr = row['Result'] + 1
     data_list2[begin_ptr:end_ptr] = [replacement_row] * (end_ptr - begin_ptr)
-    return data_list2
+    return data_list2"""
