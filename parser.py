@@ -14,8 +14,14 @@ class Parser():
              'LETTER', 'MAIN', 'OPEN_BRACKET', 'CLOSE_BRACKET', 'EQUAL', 'VAR', 'COMMA', 'COLON',
              'BEGIN', 'END', 'IF', 'ELSE', 'FOR', 'THEN', 'DO', 'WHILE', 'GREATER', 'LESS', 'INT', 'FLOAT', 'STRING',
              'EMPTY', 'QUOTE', 'STRING', 'EXCLAMATION', 'GREATEREQUAL', 'LESSEQUAL', 'INCREMENTAL', 'DECREMENTAL',
-             'EQUALITY', 'INEQUALITY', 'STRING_SENTENCE']
+             'EQUALITY', 'INEQUALITY', 'STRING_SENTENCE'],
+        precedence = [
+            ('left', ['GREATER', 'LESS','GREATEREQUAL','LESSEQUAL']),
+            ('left', ['SUM', 'SUB']),
+            ('left', ['MULT', 'DIV'])
+        ]
         )
+
 
 
 
@@ -112,20 +118,24 @@ class Parser():
         def end_sentence(p):
             return p[0]
 
-        @self.pg.production('expression : expression OPEN_PAREN expression CLOSE_PAREN')
+        @self.pg.production('expression : OPEN_PAREN expression CLOSE_PAREN')
         def expression_paren(p):
             return p[1]
 
-        @self.pg.production('expression : simple GREATER simple')
-        @self.pg.production('expression : simple LESS simple')
-        @self.pg.production('expression : simple GREATEREQUAL simple')
-        @self.pg.production('expression : simple LESSEQUAL simple')
-        @self.pg.production('expression : simple EQUALITY simple')
-        @self.pg.production('expression : simple INEQUALITY simple')
+        @self.pg.production('expression : expression GREATER expression')
+        @self.pg.production('expression : expression LESS expression')
+        @self.pg.production('expression : expression GREATEREQUAL expression')
+        @self.pg.production('expression : expression LESSEQUAL expression')
+        @self.pg.production('expression : expression EQUALITY expression')
+        @self.pg.production('expression : expression INEQUALITY expression')
+        @self.pg.production('expression : expression SUM expression')
+        @self.pg.production('expression : expression SUB expression')
+        @self.pg.production('expression : expression MULT expression')
+        @self.pg.production('expression : expression DIV expression')
         @self.pg.production('expression : variable INCREMENTAL end_sentence')
         @self.pg.production('expression : variable DECREMENTAL end_sentence')
         #@self.pg.production('expression : expression expression')
-        @self.pg.production('expression : simple')
+        @self.pg.production('expression : factor')
         def expression(p):
             if len(p) == 3:
                 left = p[0]
@@ -147,42 +157,18 @@ class Parser():
                     return astfunc.Incremental(astfunc,p[0])
                 elif p[1].gettokentype() == 'DECREMENTAL':
                     return astfunc.Decremental(astfunc,p[0])
-            elif len(p) == 2:
-                return p[1]
-            else:
-                return p[0]
-
-        @self.pg.production('simple : term SUM term')
-        @self.pg.production('simple : term SUB term')
-        @self.pg.production('simple : term term')
-        @self.pg.production('simple : term')
-        def simple(p):
-            if len(p) > 1:
-                left = p[0]
-                right = p[2]
-                operator = p[1]
-                if operator.gettokentype() == 'SUM':
+                elif operator.gettokentype() == 'SUM':
                     return astfunc.Sum(astfunc,left, right)
                 elif operator.gettokentype() == 'SUB':
                     return astfunc.Sub(astfunc,left, right)
-            else:
-                return p[0]
-
-        @self.pg.production('term : factor MULT factor')
-        @self.pg.production('term : factor DIV factor')
-        @self.pg.production('term : factor factor')
-        @self.pg.production('term : factor')
-        def term(p):
-            if len(p) > 1:
-                left = p[0]
-                right = p[2]
-                operator = p[1]
-                if operator.gettokentype() == 'MULT':
+                elif operator.gettokentype() == 'MULT':
                     return astfunc.Mult(astfunc,left, right)
                 elif operator.gettokentype() == 'DIV':
                     return astfunc.Div(astfunc,left, right)
             else:
                 return p[0]
+
+
 
         @self.pg.production('factor : NUMBER')
         def number(p):
