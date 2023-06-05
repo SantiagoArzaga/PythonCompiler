@@ -20,10 +20,14 @@ class Lexer():
         self.lexer.add('DO', r'do')
         self.lexer.add('WHILE', r'while')
 
+
+
         #Types
         self.lexer.add('INT', r'int')
         self.lexer.add('FLOAT', r'float')
         self.lexer.add('STRING', r'string')
+
+        self.lexer.add('STRING_SENTENCE', r'\".*?\"')
 
         # Print
         #self.lexer.add('PRINT', r'print')
@@ -34,17 +38,18 @@ class Lexer():
         self.lexer.add('CLOSE_BRACKET', r'\}')
 
         # Semi Colon
+        self.lexer.add('EQUAL', r'\:=')
+        self.lexer.add('EQUALITY', r'\==')
+        self.lexer.add('INEQUALITY', r'\!=')
         self.lexer.add('SEMI_COLON', r'\;')
         self.lexer.add('COLON', r'\:')
         self.lexer.add('PERIOD', r'\.')
         self.lexer.add('COMMA', r'\,')
-
         self.lexer.add('QUOTE', r'\"')
 
-        self.lexer.add('EXCLAMATION', r'\!')
-
-
         # Operators
+        self.lexer.add('DECREMENTAL', r'\-\-')
+        self.lexer.add('INCREMENTAL', r'\+\+')
         self.lexer.add('GREATEREQUAL', r'\>=')
         self.lexer.add('LESSEQUAL', r'\<=')
         self.lexer.add('SUM', r'\+')
@@ -56,13 +61,11 @@ class Lexer():
         self.lexer.add('LETTER', r'[a-zA-Z_]+')
         self.lexer.add('EMPTY', r'""')
         self.lexer.add("STRING", r"\"(\\.|[^\"\\])*\"")
-        self.lexer.add('INCREMENTAL', r'\++')
+
+
 
         # Number
         self.lexer.add('NUMBER', r'\d+')
-
-        self.lexer.add('EQUAL', r'\=')
-
         # Ignore spaces
         self.lexer.ignore('\s+')
 

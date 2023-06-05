@@ -3,6 +3,8 @@ from rply import Token
 # data = []
 # instructions = [{'Instruction': None, 'Value': None}]
 
+variable_list = []
+
 expression_quad = []
 quad = []
 ignore_list = []
@@ -59,13 +61,13 @@ class AbstractSyntaxTree():
 
     def Incremental(self, value):
         new_row = {'Instruction': "incremental", 'Op1': value, 'Op2': "0", 'Result': None}
-        expression_quad.append(new_row)
+        quad.append(new_row)
         # equality = left == right
         return len(expression_quad) - 1
 
     def Decremental(self, value):
         new_row = {'Instruction': "decremental", 'Op1': value, 'Op2': "0", 'Result': None}
-        expression_quad.append(new_row)
+        quad.append(new_row)
         # equality = left == right
         return len(expression_quad) - 1
 
@@ -157,7 +159,10 @@ class AbstractSyntaxTree():
         for row3 in expression_quad:
             print(row3)
         print("--------------PROGRAM----------------")
-        evaluate_instructions(quad)
+        evaluate_instructions(quad, ignore_list)
+        print("--------------QUAD----------------")
+        for row in reversed(quad):
+            print(row)
         print("--------------OPQUAD----------------")
         for row3 in expression_quad:
             print(row3)
@@ -186,6 +191,10 @@ def retrieve_token_value(tokenstring):
         if tokenstring == row['Op1']:
             return row['Result']
 
+def modify_token_result(tokenstring, value):
+    for row in reversed(quad):
+        if tokenstring == row['Op1']:
+            row['Result'] = value
 
 # Checks if row has pointers if not it calculates the result of the row
 def evaluate_row(row):
@@ -249,21 +258,24 @@ def add_to_ignore_list(struct, begin, end):
         ignore_list.append(struct[i])
 
 
-def add_to_ignore_list_reversed(struct, begin, end):
+def add_to_while_ignore_list(struct, begin, end, while_row):
     for i, value in enumerate(struct):
         if begin <= i <= end:
             continue
         while_ignore_list.append(struct[i])
+    for row2 in while_ignore_list:
+        if row2 == while_row:
+            while_ignore_list.remove(row2)
 
 
 def remove_from_ignore_list():
     return
 
 
-def evaluate_instructions(struct):
+def evaluate_instructions(struct, evaluate_ignore_list):
     skip = False
     for row in reversed(struct):
-        for ignore_row in ignore_list:
+        for ignore_row in evaluate_ignore_list:
             if row == ignore_row:
                 skip = True
                 break
@@ -271,20 +283,24 @@ def evaluate_instructions(struct):
                 skip = False
         if skip:
             continue
+
         if row['Instruction'] == "writestr":
             # print("write var")
             print(row['Result'])
+
         elif row['Instruction'] == "assign":
             if type(row['Result']) is int:
                 var_retrieved_value = evaluate_row(retrieve_ptr_row(row['Result'], expression_quad))
                 row['Result'] = var_retrieved_value
             else:
                 continue
+
         elif row['Instruction'] == "writevar":
             # print("writevar")
             for row2 in reversed(struct):
                 if row2['Op1'] == row['Result']:
                     print(row2['Result'])
+
         elif row['Instruction'] == "if":
             # print("if")
             var_retrieved_value = evaluate_row(retrieve_ptr_row(row['Result'], expression_quad))
@@ -294,6 +310,7 @@ def evaluate_instructions(struct):
             else:
                 add_to_ignore_list(struct, row['Op2'], row['Op1'])
                 skip = True
+
         elif row['Instruction'] == "else":
             # print("else")
             if_row = retrieve_ptr_row(row['Result'], struct)
@@ -301,6 +318,7 @@ def evaluate_instructions(struct):
                 continue
             else:
                 add_to_ignore_list(struct, row['Op2'], row['Op1'])
+
         elif row['Instruction'] == "while":
             # print("while")
             # revisar statement de while
@@ -309,18 +327,31 @@ def evaluate_instructions(struct):
             # if true
             # print("Retrieved while bool", var_retrieved_value)
             if int(var_retrieved_value) == 1:
-                add_to_ignore_list_reversed(struct, row['Op2'], row['Op1'])
+                #evaluar si es la primera corrida, si no es no hacer ete pedo
+                add_to_while_ignore_list(struct, row['Op2'], row['Op1'], row)
+                """
                 print("===========While Ignore List==========")
                 for row2 in while_ignore_list:
                     print(row2)
-                print("======================================")
+                print("======================================")"""
+
+                evaluate_instructions(quad, while_ignore_list)
+
             # añadir lo que no sea el bloque a la ignore_list
             # evaluar instrucciones de nuevo con  evaluate instruction y
             # probablemente alterar el statement del while con el codigo del bloque
             # else
             # eliminar valores del ignore list
             # continuar la ejecucion
-            return
+
+        elif row['Instruction'] == "incremental" or row['Instruction'] == "decremental":
+            if type(row['Op1']) is Token:
+                variable = row['Op1'].getstr()
+            else:
+                variable = row['Op1']
+            result = evaluate_row(row)
+            row['Result'] = result
+            modify_token_result(variable, result)
     return
 
 

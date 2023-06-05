@@ -13,7 +13,8 @@ class Parser():
              'SEMI_COLON', 'SUM', 'SUB', 'PROGRAM', 'DIV', 'MULT',
              'LETTER', 'MAIN', 'OPEN_BRACKET', 'CLOSE_BRACKET', 'EQUAL', 'VAR', 'COMMA', 'COLON',
              'BEGIN', 'END', 'IF', 'ELSE', 'FOR', 'THEN', 'DO', 'WHILE', 'GREATER', 'LESS', 'INT', 'FLOAT', 'STRING',
-             'EMPTY', 'QUOTE', 'STRING', 'EXCLAMATION', 'GREATEREQUAL', 'LESSEQUAL', 'INCREMENTAL']
+             'EMPTY', 'QUOTE', 'STRING', 'EXCLAMATION', 'GREATEREQUAL', 'LESSEQUAL', 'INCREMENTAL', 'DECREMENTAL',
+             'EQUALITY', 'INEQUALITY', 'STRING_SENTENCE']
         )
 
 
@@ -64,23 +65,24 @@ class Parser():
         @self.pg.production('declaration : write_statement')
         @self.pg.production('declaration : if_statement')
         @self.pg.production('declaration : while_statement')
+        @self.pg.production('declaration : expression')
         def declaration(p):
             return p[0]
 
         @self.pg.production('write_statement : write OPEN_PAREN expression CLOSE_PAREN end_sentence')
-        @self.pg.production('write_statement : write OPEN_PAREN QUOTE expression QUOTE CLOSE_PAREN end_sentence')
+        @self.pg.production('write_statement : write OPEN_PAREN STRING_SENTENCE CLOSE_PAREN end_sentence')
         def write_statement(p):
-            if len(p) == 5:
+            if p[2].gettokentype() != "STRING_SENTENCE":
                 astfunc.write_instruction(astfunc, p[2].getstr(), "var")
             else:
-                astfunc.write_instruction(astfunc, p[3].getstr(), "string")
+                astfunc.write_instruction(astfunc, p[2].getstr(), "string")
 
         @self.pg.production('write : WRITE')
         def write(p):
             return
             #astfunc.write_instruction(astfunc, "cosa", "string")
 
-        @self.pg.production('variable_assignation : variable equal expression end_sentence')
+        @self.pg.production('variable_assignation : variable EQUAL expression end_sentence')
         def variable_assignation(p):
             return astfunc.variable_assignation(astfunc, p[0].getstr(), p[2])
 
@@ -110,18 +112,25 @@ class Parser():
         def end_sentence(p):
             return p[0]
 
+        @self.pg.production('expression : expression OPEN_PAREN expression CLOSE_PAREN')
+        def expression_paren(p):
+            return p[1]
+
         @self.pg.production('expression : simple GREATER simple')
+        @self.pg.production('expression : simple LESS simple')
         @self.pg.production('expression : simple GREATEREQUAL simple')
         @self.pg.production('expression : simple LESSEQUAL simple')
-        @self.pg.production('expression : simple LESS simple')
-        @self.pg.production('expression : expression expression')
+        @self.pg.production('expression : simple EQUALITY simple')
+        @self.pg.production('expression : simple INEQUALITY simple')
+        @self.pg.production('expression : variable INCREMENTAL end_sentence')
+        @self.pg.production('expression : variable DECREMENTAL end_sentence')
+        #@self.pg.production('expression : expression expression')
         @self.pg.production('expression : simple')
         def expression(p):
-            if len(p) > 1:
+            if len(p) == 3:
                 left = p[0]
                 right = p[2]
                 operator = p[1]
-                print(operator)
                 if operator.gettokentype() == 'GREATER':
                     return astfunc.Greater(astfunc, left, right)
                 elif operator.gettokentype() == 'LESS':
@@ -130,11 +139,22 @@ class Parser():
                     return astfunc.GreaterEqual(astfunc,left, right)
                 elif operator.gettokentype() == 'LESSEQUAL':
                     return astfunc.LessEqual(astfunc,left, right)
+                elif operator.gettokentype() == 'EQUALITY':
+                    return astfunc.Equality(astfunc,left, right)
+                elif operator.gettokentype() == 'INEQUALITY':
+                    return astfunc.Inequality(astfunc,left, right)
+                elif p[1].gettokentype() == 'INCREMENTAL':
+                    return astfunc.Incremental(astfunc,p[0])
+                elif p[1].gettokentype() == 'DECREMENTAL':
+                    return astfunc.Decremental(astfunc,p[0])
+            elif len(p) == 2:
+                return p[1]
             else:
                 return p[0]
 
         @self.pg.production('simple : term SUM term')
         @self.pg.production('simple : term SUB term')
+        @self.pg.production('simple : term term')
         @self.pg.production('simple : term')
         def simple(p):
             if len(p) > 1:
@@ -150,6 +170,7 @@ class Parser():
 
         @self.pg.production('term : factor MULT factor')
         @self.pg.production('term : factor DIV factor')
+        @self.pg.production('term : factor factor')
         @self.pg.production('term : factor')
         def term(p):
             if len(p) > 1:
@@ -174,10 +195,6 @@ class Parser():
             var_name = p[0]
             #astfunc.expression_instruction(astfunc, var_name.getstr())
             return var_name
-
-        @self.pg.production('equal : COLON EQUAL')
-        def equal(p):
-            return
 
         @self.pg.production('open_bracket : OPEN_BRACKET')
         def open_bracket(p):
